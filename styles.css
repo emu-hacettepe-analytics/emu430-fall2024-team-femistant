@@ -1,0 +1,145 @@
+/* Google Fonts bağlantısı */
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;700&display=swap');
+
+/* Ana tema renkleri */
+:root {
+    --deep-purple: #4B0032;     /* Ana tema rengi - ciddiyet */
+    --alert-red: #CC2A49;       /* Uyarı/dikkat rengi */
+    --light-purple: #E8D7E2;    /* Hafif vurgular için */
+    --awareness-purple: #9B3675; /* Farkındalık vurgusu */
+    --base-font-size: 18px;     /* Temel yazı boyutu */
+}
+
+/* Tüm sayfa genel yazı stilleri */
+body {
+    font-family: 'Roboto', sans-serif;
+    font-size: var(--base-font-size);
+    line-height: 1.7;
+    color: #333; /* Yazı rengi */
+    margin: 0;
+    padding: 0;
+}
+
+/* Ana başlıklar */
+h1, h2, h3 {
+    color: var(--deep-purple);
+    font-weight: 700;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    line-height: 1.4;
+}
+
+h1 {
+    font-size: 2.5em;
+    border-bottom: 3px solid var(--alert-red);
+    padding-bottom: 10px;
+}
+
+h2 {
+    font-size: 2em;
+}
+
+h3 {
+    font-size: 1.75em;
+}
+
+/* Paragraflar */
+p {
+    margin-bottom: 20px;
+    font-size: 1.1em;
+}
+
+/* Linkler */
+a {
+    color: var(--awareness-purple);
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+a:hover {
+    color: var(--alert-red);
+}
+
+/* Listeler */
+ul, ol {
+    padding-left: 25px;
+}
+
+li {
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+/* Veri vurgulama kutuları */
+.highlight-box {
+    background-color: rgba(204, 42, 73, 0.1);
+    border-left: 4px solid var(--alert-red);
+    padding: 15px;
+    margin: 20px 0;
+    font-size: 1.1em;
+    border-radius: 5px;
+}
+
+/* Grafik ve tablolar */
+.figure {
+    border: 1px solid var(--light-purple);
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 3px 10px rgba(75, 0, 50, 0.1);
+    margin: 20px 0;
+}
+
+/* Tablo stilleri */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 1em;
+    text-align: left;
+}
+
+th {
+    background-color: var(--deep-purple);
+    color: #fff;
+    padding: 10px;
+    border: 1px solid var(--light-purple);
+}
+
+td {
+    border: 1px solid var(--light-purple);
+    padding: 10px;
+}
+
+/* Özel vurgular */
+.important {
+    background-color: rgba(155, 54, 117, 0.1);
+    border-left: 4px solid var(--awareness-purple);
+    padding: 15px;
+    margin: 20px 0;
+}
+
+/* Bağlantılar için temel stil */
+a {
+    color: #9B3675; /* Bağlantı rengi (farkındalık moru) */
+    text-decoration: none; /* Alt çizgiyi kaldır */
+    font-weight: bold; /* Kalın yazı */
+    transition: all 0.3s ease; /* Hover efekti için geçiş */
+}
+
+/* Bağlantı kutusu için tasarım */
+a.link-box {
+    display: inline-block; /* Kutuyu bağlantının çevresine sar */
+    padding: 10px 15px; /* Kutunun iç boşluğu */
+    border: 2px solid #9B3675; /* Kenarlık */
+    border-radius: 8px; /* Yuvarlak köşeler */
+    background-color: #F9F3F7; /* Hafif bir arka plan rengi */
+    box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1); /* Hafif gölge */
+    text-align: center;
+}
+
+/* Hover (Üzerine Gelindiğinde) Efekt */
+a.link-box:hover {
+    background-color: #9B3675; /* Mor arka plan */
+    color: #fff; /* Yazı rengini beyaz yap */
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2); /* Daha belirgin gölge */
+}

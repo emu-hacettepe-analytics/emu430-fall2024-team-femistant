@@ -1,0 +1,289 @@
+
+
+# General Information About Data
+
+The data was provided by the We Will Announce Femicides Platform and a counter bot that automatically runs every time a femicide news item hits the system. The data was scraped from the internet. The values we have in general. It includes information such as provinces, proximity status, the reason for the killing, the manner of killing and the status of the perpetrator. 
+
+[rdata](link eklenmeli)  
+
+
+# Why This Dataset Was Chosen:
+
+-	Femicide is one of the most critical societal issues in Turkey, and analyzing it from a data-driven perspective can provide meaningful insights into its root causes and trends.
+-	The dataset is open access, reliable, and directly relevant to Turkey.
+-	It allows for both spatial and temporal analysis of femicide incidents.
+-	The findings could contribute to awareness campaigns and data-informed policy recommendations.
+
+
+# Our Goals 
+
+We will try to remove the raw data and make it ready for analysis. While unnecessary columns are removed. There will be columns that we need to make corrections and we will also create new columns. By removing repetitive data in our data set, we will make the data ready to work
+Objectives and Goals:
+- Primary Objective:
+- Our goal is to analyze femicide cases across Turkey, focusing on changes over time, identifying regional hotspots, and exploring the relationship with socio-economic and cultural factors.
+-	Investigate whether femicide rates have been increasing or decreasing over the years.
+-	Map regional hotspots and explore the relationships between femicide cases and variables such as population density, education levels, and economic conditions.
+-	Examine the profiles of perpetrators and victims to understand risk factors.
+-	Provide actionable insights that can contribute to policy formulation and support advocacy campaigns.
+
+
+ - 1 Since this data was taken from the news source, repetitive values due to surname entries were present in 4 years, but now these values have been eliminated by calculating the proximity between texts and using the algorithm. Afterwards, unnecessary code repetition was avoided with a loop 
+
+ 
+```{r message=FALSE}
+library(dplyr)
+library(stringdist)
+years <- 2020:2024
+
+threshold <- 0.23
+cleaned_data_list <- list()
+
+
+for (year in years) {
+  file_name <- paste0("anitsayac_full_data_", year, ".csv")
+  data <- read.csv(file_name, stringsAsFactors = FALSE)
+  
+  data <- data %>%
+    mutate(
+      Similar_Group = apply(
+        stringdistmatrix(Ad.Soyad., Ad.Soyad., method = "jw"), 
+        1, 
+        function(x) which(x < threshold)[1]  
+      )
+    )
+  
+  cleaned_data <- data %>%
+    group_by(Similar_Group) %>%
+    slice(1)  
+  
+  cleaned_data_list[[as.character(year)]] <- cleaned_data
+  
+  
+}
+
+names(cleaned_data_list)
+
+cleaned_2020 <- cleaned_data_list[["2020"]]
+cleaned_2021 <- cleaned_data_list[["2021"]]
+cleaned_2022 <- cleaned_data_list[["2022"]]
+cleaned_2023 <- cleaned_data_list[["2023"]]
+cleaned_2024 <- cleaned_data_list[["2024"]]
+
+
+```
+
+ - 2 Data will now be merged and redundant columns will be deleted. Source and similar groups columns will no longer exist. We continue by removing unused columns
+
+ 
+```{r}
+
+combined_data <- bind_rows(cleaned_data_list)
+
+combined_data <- combined_data %>%
+  ungroup()
+
+combined_data <- combined_data %>%
+  select(-Kaynak., -Similar_Group, -Notlar.)
+
+```
+ 
+ 
+  - 3 The data is in time string format, which is a problem for time-based visualizations, so it will be converted to time format.
+
+  
+```{r message=FALSE}
+library(lubridate)
+
+
+print(head(combined_data$Tarih.))  
+
+
+combined_data$Tarih. <- as.Date(combined_data$Tarih., format = "%d/%m/%Y")
+
+
+print(head(combined_data$Tarih.))
+
+```
+  
+
+-4 For the cities in the data, we will also need to create a new continuum according to their regions in Turkey, because we will use it when we move on to the analysis.
+
+
+```{r}
+# İl ve İlçeleri Bölgelerine Göre Gruplama Fonksiyonu
+ilce_to_region <- function(ilce) {
+  marmara <- c("İstanbul", "Bursa", "Edirne", "Tekirdağ", "Kocaeli", "Yalova", "Çanakkale", "Balıkesir", "Sakarya", "Düzce", "Bilecik", "Silivri", "İzmit", "Gebze", "Arnavutköy", "Gemlik", "Çorlu")
+  ege <- c("İzmir", "Aydın", "Manisa", "Denizli", "Muğla", "Uşak", "Afyonkarahisar", "Kütahya", "Bodrum", "Didim", "Fethiye", "Alanya", "Ödemiş", "Buca")
+  karadeniz <- c("Trabzon", "Rize", "Samsun", "Ordu", "Giresun", "Zonguldak", "Bartın", "Sinop", "Amasya", "Çorum", "Kastamonu", "Karabük", "Tokat", "Artvin", "Gümüşhane", "Osmancık")
+  akdeniz <- c("Antalya", "Adana", "Mersin", "Hatay", "Osmaniye", "Burdur", "Isparta", "Kahramanmaraş", "Gazipaşa", "Marmaris")
+  ic_anadolu <- c("Ankara", "Eskişehir", "Konya", "Kayseri", "Sivas", "Niğde", "Aksaray", "Karaman", "Kırıkkale", "Kırşehir", "Nevşehir", "Yozgat", "Çankırı", "Sincan", "Polatlı")
+  dogu_anadolu <- c("Erzurum", "Van", "Malatya", "Elazığ", "Ağrı", "Iğdır", "Muş", "Bitlis", "Kars", "Hakkari", "Bingöl", "Ardahan", "Tunceli", "Erzincan")
+  guneydogu_anadolu <- c("Diyarbakır", "Gaziantep", "Şanlıurfa", "Mardin", "Batman", "Siirt", "Adıyaman", "Kilis", "Şırnak", "Urfa", "ŞanlıUrfa")
+  
+  if (ilce %in% marmara) return("Marmara")
+  if (ilce %in% ege) return("Ege")
+  if (ilce %in% karadeniz) return("Karadeniz")
+  if (ilce %in% akdeniz) return("Akdeniz")
+  if (ilce %in% ic_anadolu) return("İç Anadolu")
+  if (ilce %in% dogu_anadolu) return("Doğu Anadolu")
+  if (ilce %in% guneydogu_anadolu) return("Güneydoğu Anadolu")
+  return("Tespit Edilemeyen")
+}
+
+combined_data$Bölge <- sapply(combined_data$İl.ilçe., ilce_to_region)
+
+head(combined_data)
+
+
+```
+
+ - 5 The data was grouped under certain categories and the data format from different places was brought together in the same denominator.
+
+
+```{r}
+
+failin_durumu_mapping <- list(
+  "Tutuklu" = "Tutuklu",
+  "Tutuklu Değik" = "Tutuklu",
+  "Tutuku" = "Tutuklu",
+  "Tespit Edilemeyen" = "Tespit Edilemeyen",
+  "Tespi Edilemeyen" = "Tespit Edilemeyen",
+  "Tespit Edielemeyen" = "Tespit Edilemeyen",
+  "Tesbit Edilemeyen" = "Tespit Edilemeyen",
+  "İntihar" = "İntihar",
+  "İntihar Teşebbüsü" = "İntihar Teşebbüsü",
+  "İntihara Teşebbüs" = "İntihar Teşebbüsü",
+  "İntiihar Teşebbüsü" = "İntihar Teşebbüsü",
+  "İnthihara Teşebbüs" = "İntihar Teşebbüsü",
+  "Soruşturma Sürüyo" = "Soruşturma Sürüyor",
+  "Soruşturma Sürüyor" = "Soruşturma Sürüyor",
+  "Belirtilmemiş" = "Belirtilmemiş",
+  "Aranıyor" = "Aranıyor",
+  "Serbest" = "Serbest",
+  "Dava Sürüyor" = "Dava Sürüyor",
+  "Polis Çatışmasına Öldü" = "Polis Çatışmasına Öldü",
+  "Öldü" = "Öldü"
+)
+
+combined_data$Failin.durumu. <- unlist(lapply(combined_data$Failin.durumu., function(x) {
+  if (!is.na(x) && x %in% names(failin_durumu_mapping)) {
+    return(failin_durumu_mapping[[x]])
+  } else {
+    return(x)
+  }
+}))
+
+reason_mapping <- list(
+  "Kıskançlık" = "Kıskançlık",
+  "Tartışma" = "Tartışma",
+  "Velayetin Anneye Verilmesi" = "Velayetin Anneye Verilmesi",
+  "Kızını Korurken" = "Koruma",
+  "Annesini Korurken" = "Koruma",
+  "Akrabasını Korurken" = "Koruma",
+  "Tartışma, Kıskançlık" = "Tartışma",
+  "Tespit Edilemeyen" = "Tespit Edilemeyen",
+  "Tespit Edilmeyen" = "Tespit Edilemeyen",
+  "Tespi Edilemeyen" = "Tespit Edilemeyen",
+  "Tespit  Edilemeyen" = "Tespit Edilemeyen",
+  "Tespit Edielemeyen" = "Tespit Edilemeyen",
+  "Tartışma, Reddedilme" = "Tartışma",
+  "Reddedilme" = "Reddedilme",
+  "Reddedilm" = "Reddedilme",
+  "Reddetme" = "Reddedilme",
+  "Aldatma Şüphesi" = "Aldatma",
+  "Aldatma" = "Aldatma",
+  "Boşanma Talebi" = "Boşanma Talebi",
+  "Tartışma, Boşanma Talebi" = "Tartışma",
+  "Ayrılma Talebi" = "Ayrılma Talebi",
+  "Namus" = "Namus",
+  "Nefret" = "Nefret",
+  "Nefret Cinayeti" = "Nefret",
+  "Nefret Suçu" = "Nefret",
+  "Husumet" = "Husumet",
+  "Husemet" = "Husumet",
+  "Husumet, Tartışma" = "Husumet",
+  "Aile Husumeti" = "Husumet",
+  "Para" = "Para",
+  "Para,Tartışma" = "Para",
+  "Maganda Kurşunu" = "Kaza",
+  "Kaza" = "Kaza",
+  "Miras" = "Miras",
+  "Miras Kavgası" = "Miras",
+  "Geçimsizlik, Kıskançlık" = "Kıskançlık",
+  "Platonik Aşk" = "Saplantı",
+  "Reddedilme, Saplantı" = "Saplantı",
+  "Evlilik Teklifini Reddetme" = "Reddedilme",
+  "Kıskanma" = "Kıskançlık",
+  "Tecavüz" = "Cinsel Saldırı",
+  "Para, Cinsel Saldıri" = "Cinsel Saldırı",
+  "Harçlık Vermediği İçin" = "Diğer",
+  "Erkekliğine Küfür Etmesi" = "Diğer",
+  "Tartışma, Miras" = "Miras",
+  "Tartışma, Aldatma Şüphesi" = "Aldatma",
+  "Tartışma, Namus" = "Namus",
+  "Hakaret" = "Diğer",
+  "Tehdit" = "Tehdit",
+  "Tehdit, Kin" = "Tehdit",
+  "Torununu Korumaya Çalışırken" = "Koruma",
+  "Kızını Korumaya Çalışırken" = "Koruma",
+  "Kardeşini Korumaya Çalışırken" = "Koruma",
+  "Birisini Korumaya Çalışırken" = "Koruma",
+  "Arkadaşını Korumaya Çalışırken" = "Koruma",
+  "Annesini Korumaya Çalışırken" = "Koruma",
+  "Boşanma, Husumet" = "Husumet"
+)
+
+combined_data$Neden.öldürüldü. <- unlist(lapply(combined_data$Neden.öldürüldü., function(x) {
+  if (!is.na(x) && x %in% names(reason_mapping)) {
+    return(reason_mapping[[x]])
+  } else {
+    return(x)
+  }
+}))
+
+library(dplyr)
+
+combined_data$Kategori <- case_when(
+  combined_data$Neden.öldürüldü. %in% c(
+    "Boşanma", "Boşanma Talebi", "Boşanma Talebi, Tartışma", 
+    "Velayetin Anneye Verilmesi", "Ayrılma Talebi", "Reddedilme", 
+    "Reddedilme, Ayrılma Talebi", "Kızını Korurken", "Annesini Korurken", 
+    "Kız kardeşini korurken", "Torununu ve Kızını Korumaya Çalışırken"
+  ) ~ "Ailevi Sebepler",
+  combined_data$Neden.öldürüldü. %in% c(
+    "Para", "Alacak Meselesi", "Miras", "Husumet, Para", 
+    "Tartışma, Miras", "Aldatma", "Aldatama Şüphesi"
+  ) ~ "Ekonomik Sebepler",
+  combined_data$Neden.öldürüldü. %in% c(
+    "Kıskançlık", "İhanet", "Nefret", "Töre", 
+    "Töre Cinayeti", "Husumet", "Büyü Yaptığına İnandığı İçin", 
+    "Saplantı"
+  ) ~ "Duygusal/Sosyal Sebepler",
+  combined_data$Neden.öldürüldü. %in% c(
+    "İntikam", "Çatışmanın İçinde Kaldı", "Cin Çıkartma", 
+    "Boğularak"
+  ) ~ "Şiddet veya İntikam",
+  TRUE ~ "Şiddet veya İntikam"
+)
+
+combined_data$Failin.durumu.[is.na(combined_data$Failin.durumu.) | combined_data$Failin.durumu. == "" | combined_data$Failin.durumu. == " "] <- "0"
+
+combined_data$Failin.durumu. <- ifelse(
+  combined_data$Failin.durumu. == "0", 
+  "Belirtilmemiş", 
+  combined_data$Failin.durumu. 
+)
+
+
+
+
+```
+ 
+
+
+ - 6 If we look at the data set before the analysis, an end was reached using EDA techniques with the necessary transformations made, which are now in general outlines 
+ 
+```{r}
+head(combined_data)
+```
+ 

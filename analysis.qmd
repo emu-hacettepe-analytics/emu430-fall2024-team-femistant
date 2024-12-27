@@ -1,0 +1,162 @@
+
+
+
+
+## 1 Number of Femicides by Year
+
+```{r message= FALSE}
+library(plotly)
+library(readr)
+combined_data <- read_csv('combined_data.csv',show_col_types = FALSE)
+combined_data$Year <- format(combined_data$Tarih., "%Y")
+
+filtered_data <- subset(combined_data, Year != "2010")
+
+yearly_counts <- as.data.frame(table(filtered_data$Year)) 
+colnames(yearly_counts) <- c("Year", "Incident_Count") 
+
+yearly_counts$Year <- as.numeric(as.character(yearly_counts$Year)) 
+yearly_counts <- yearly_counts[order(yearly_counts$Year), ] 
+
+plot_ly(
+  data = yearly_counts,
+  x = ~Year,
+  y = ~Incident_Count,
+  type = 'scatter',
+  mode = 'lines+markers',
+  line = list(color = 'blue'),
+  marker = list(color = 'red', size = 8)
+) %>%
+  layout(
+    title = "Number of Murders by Year ",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Number of Murders"),
+    hovermode = "closest"
+  )
+
+```
+
+When we look at the number of people who have died from femicides over the years, it seems that there has been an increase in the number. The reasons for this increase can be explained by social, economic or political factors.
+
+
+
+## 2 Number of Femicides by Region
+
+```{r}
+region_counts <- as.data.frame(table(filtered_data$Bölge))
+colnames(region_counts) <- c("Region", "Incident_Count")
+
+plot_ly(
+  data = region_counts,
+  x = ~Region,
+  y = ~Incident_Count,
+  type = 'bar',
+  color = ~Region, 
+  colors = "Set2"  
+) %>%
+  layout(
+    title = "Number of Murders by Region",
+    xaxis = list(title = "Region"),
+    yaxis = list(title = "Number of Murders")
+  )
+
+```
+This graph shows the number of homicides in different regions of Turkey. The most striking feature is that the Marmara Region has a much higher number of homicides compared to other regions. This can be explained by the high population density and urbanization in the Marmara Region. In the Mediterranean, Aegean and Southeastern Anatolia regions, the number of homicides is at moderate levels. In Eastern Anatolia, the number of homicides is quite low, which can be attributed to the low population density of the region. In addition, the presence of the category “Undetermined” suggests that the region in which some homicides took place could not be determined or that there were data gaps. This graph shows the need for a detailed analysis to better understand the reasons for the differences between regions.
+
+## 3 What are the causes of homicide 
+
+```{r}
+reason_counts <- as.data.frame(table(filtered_data$Kategori))
+colnames(reason_counts) <- c("Reason", "Incident_Count")
+
+plot_ly(
+  data = reason_counts,
+  labels = ~Reason,
+  values = ~Incident_Count,
+  type = 'pie',
+  textinfo = 'label+percent',
+  insidetextorientation = 'radial'
+) %>%
+  layout(
+    title = "Distribution of Murder Reasons"
+  )
+
+```
+
+It reveals that homicides are largely personal or violence-based. Family reasons and emotional/social factors also have a significant share. The relatively lower percentage of economic reasons suggests that homicides are more likely to be motivated by personal conflicts. These findings emphasize the importance of social support and intervention programs to reduce the effects of individual violence and revenge within the community.
+
+
+# 4 What are the Methods of Murder 
+
+```{r}
+method_counts <- as.data.frame(table(filtered_data$Öldürülme.şekli.))
+colnames(method_counts) <- c("Method", "Incident_Count")
+
+plot_ly(
+  data = method_counts,
+  x = ~Incident_Count,
+  y = ~Method,
+  type = 'bar',
+  orientation = 'h',
+  marker = list(color = 'orange')
+) %>%
+  layout(
+    title = "Distribution of Murder Methods",
+    xaxis = list(title = "Number of Murders"),
+    yaxis = list(title = "Method")
+  )
+
+```
+It shows that the methods used in homicides are mostly centered around firearms and cutting tools. This shows that the methods that individuals have easy access to and that yield quick results are preferred. 
+
+- Access to Firearms and Sharps: Emphasis should be placed on regulations to limit the use of firearms and sharps.
+- Forensic Investigation Enhancements: More effective forensic analysis methods can be implemented to reduce “undetectable” cases.
+- Analysis of Different Methods: A detailed analysis of rarely used methods can provide a better understanding of the motivations and circumstances behind these cases.
+
+
+# 5 Cumulative number of homicides 
+```{r}
+yearly_counts$Cumulative_Count <- cumsum(yearly_counts$Incident_Count)
+
+plot_ly(
+  data = yearly_counts,
+  x = ~Year,
+  y = ~Cumulative_Count,
+  type = 'scatter',
+  mode = 'lines',
+  fill = 'tozeroy',
+  line = list(color = 'green')
+) %>%
+  layout(
+    title = "Cumulative Number of Murders Over Years",
+    xaxis = list(title = "Year"),
+    yaxis = list(title = "Cumulative Number of Murders")
+  )
+```
+
+
+
+ - The fact that there is no significant decrease or sudden change in the graph suggests that homicide rates have been steadily increasing every year.
+ - This trend highlights the need for long-term and effective strategies to address incidents of social violence.
+
+# 6 What is the Current Situation of the Perpetrator 
+```{r}
+status_counts <- as.data.frame(table(filtered_data$Failin.durumu.))
+colnames(status_counts) <- c("Status", "Incident_Count")
+
+plot_ly(
+  data = status_counts,
+  x = ~Status,
+  y = ~Incident_Count,
+  type = 'bar',
+  marker = list(color = 'purple')
+) %>%
+  layout(
+    title = "Distribution of Perpetrator Status",
+    xaxis = list(title = "Status"),
+    yaxis = list(title = "Number of Murders")
+  )
+
+```
+
+The distribution of the status of perpetrators of murder is shown. The most striking category is that the majority of the perpetrators are in “Detained” status. This shows that the justice system is working effectively and most of the perpetrators are apprehended and brought to justice. However, there is also a high share of the category “Undetected”, indicating the existence of unsolved cases. This may be due to the complexity of some cases or shortcomings in investigations.

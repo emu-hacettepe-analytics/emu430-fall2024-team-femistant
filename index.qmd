@@ -1,0 +1,38 @@
+---
+title: "Spatial and Temporal Analysis of Femicide Cases in Turkey"
+format:
+  html:
+    theme: 
+      light: flatly
+      dark: darkly
+    css: styles.css
+---
+
+Welcome! This is our project webpage.
+
+Please stay tuned to follow our project activities.
+
+# Team Name : Femistat 
+
+## Takım Üyeleri
+
+- [isim](github)  
+- [isim](github)
+
+
+Source:  We Will Stop Femicide Platform (Kadın Cinayetlerini Durduracağız Platformu)
+https://kadincinayetlerinidurduracagiz.net
+
+
+## Project Topic
+
+Within the scope of the project, we scrape (optional) a dataset of femicides that took place in Turkey between 2020-2024 and we will use it. We are working with a dataset that has details such as the names of the murdered women, their legal age, by whom they were killed, the reason for this, the date, and the way they were killed. Thanks to this dataset, we can see important points such as the number of murdered women by year.
+
+We can also reach values that will allow us to make various inferences according to the cities and the proximity of the murderers. These analyses will reveal what is happening in each city, and we will have an idea about the people who have lost their lives and how things have been going in these 4 years. It should be able to show how we can prevent this.
+
+
+
+## Key Takeaways
+
+1. With these analyzes, we will reveal a period of 4 years, not annually. In this way, we will be able to see the situation of femicides in Turkey after the pandemic or we will be able to see in what situations human life is so cheap.
+

@@ -1,0 +1,33 @@
+project:
+  type: website
+
+website:
+  title: "Spatial and Temporal Analysis of Femicide Cases in Turkey"
+  navbar:
+    background: "#4B0032"  # Derin mor - ciddiyet için
+    foreground: "#ffffff"
+    left:
+      - href: index.qmd
+        text: Home
+      - href: data.qmd
+        text: Data
+      - href: analysis.qmd
+        text: Analysis
+    tools:
+      - icon: github
+        href: https://github.com/emu-hacettepe-analytics/your-repo
+  page-navigation: true
+  back-to-top-navigation: true
+  page-footer:
+    center: "Hacettepe IE - EMU 430 - Fall 2024" 
+    border: true
+    background: "#4B0032"
+    foreground: "#ffffff"
+
+format:
+  html:
+    toc: true
+    toc-location: left
+    theme: cosmo
+    css: styles.css
+    code-fold: true
